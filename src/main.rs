@@ -91,8 +91,8 @@ fn handle_lost_events(cpu: i32, count: u64) {
 fn main() -> Result<()> {
     let opts: Command = Command::from_args();
 
-    let mut skel_builder: CfileopsSkelBuilder = CfileopsSkelBuilder::default();
-    let mut open_skel: OpenCfileopsSkel = skel_builder.open()?;
+    let mut skel_builder: CopencloseSkelBuilder = CopencloseSkelBuilder::default();
+    let mut open_skel: OpenCopencloseSkel = skel_builder.open()?;
 
     open_skel.rodata().ignore_host_ns = if opts.ignore_host_ns { 1 } else { 0 };
     open_skel.rodata().use_cgroup_v2 = if opts.use_cgroup_v2 { 1 } else { 0 };
