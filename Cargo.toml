@@ -1,0 +1,13 @@
+[package]
+name = "cfileops"
+version = "0.1.0"
+authors = ["Uchio Kondo <udzura@udzura.jp>"]
+edition = "2018"
+
+[dependencies]
+
+anyhow = "1.0"
+libbpf-rs = "0.6.1"
+plain = "0.2.3"
+chrono = "0.4.19"
+structopt = "0.3.21"
