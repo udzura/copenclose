@@ -3,6 +3,15 @@ copenclose(8)
 
 Tracking open/close operations for containers; using either cgroup v2 or namespace. 
 
+### Supported syscalls
+
+- open
+- openat
+- accept
+- accept4
+- connect
+- close
+
 ## Usage
 
 ```console
@@ -20,9 +29,51 @@ FLAGS:
 
 Without `-C`, copenclose uses UTS namespace to determine containers.
 
+```console
+$ sudo ./target/debug/copenclose -I
+TIME                 HOSTNAME         PID    UID    GID    SYSCALL  COMM
+2021-01-19T07:35:10Z 6643ca763e3e     107148 100000 100000 accept4  httpd
+2021-01-19T07:35:10Z 6643ca763e3e     107147 100000 100000 accept4  httpd
+2021-01-19T07:35:10Z 6643ca763e3e     107146 100000 100000 accept4  httpd
+2021-01-19T07:35:10Z 6643ca763e3e     107148 100000 100000 openat   httpd
+2021-01-19T07:35:10Z 6643ca763e3e     107148 100000 100000 close    httpd
+2021-01-19T07:35:10Z 6643ca763e3e     107148 100000 100000 close    httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106962 100000 100000 accept4  httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106963 100000 100000 accept4  httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106961 100000 100000 accept4  httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106963 100000 100000 openat   httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106963 100000 100000 close    httpd
+2021-01-19T07:35:11Z f75f4ffd7f1d     106963 100000 100000 close    httpd
+2021-01-19T07:35:14Z 1e012607c8bf     106767 100000 100000 accept4  httpd
+2021-01-19T07:35:14Z 1e012607c8bf     106766 100000 100000 accept4  httpd
+2021-01-19T07:35:14Z 1e012607c8bf     106767 100000 100000 openat   httpd
+2021-01-19T07:35:14Z 1e012607c8bf     106767 100000 100000 close    httpd
+2021-01-19T07:35:14Z 1e012607c8bf     106767 100000 100000 close    httpd
+```
+
 With `-C`, the tool uses cgroup v2 id. Is is supported by runtimes such as podman/crun.
 
-With `-I`, the tool ignores events occured in the current host.
+```console
+$ sudo ./target/debug/copenclose -I -C
+TIME                 CGROUPID PID    UID    GID    SYSCALL  COMM
+2021-01-19T07:36:05Z     3333 106765 100000 100000 accept4  httpd
+2021-01-19T07:36:05Z     3333 106765 100000 100000 openat   httpd
+2021-01-19T07:36:05Z     3333 106765 100000 100000 openat   httpd
+2021-01-19T07:36:05Z     3333 106765 100000 100000 close    httpd
+2021-01-19T07:36:05Z     3333 106765 100000 100000 close    httpd
+2021-01-19T07:36:05Z     3333 106765 100000 100000 close    httpd
+2021-01-19T07:36:06Z     3348 106962 100000 100000 accept4  httpd
+2021-01-19T07:36:06Z     3348 106962 100000 100000 openat   httpd
+2021-01-19T07:36:06Z     3348 106962 100000 100000 close    httpd
+2021-01-19T07:36:06Z     3348 106962 100000 100000 close    httpd
+2021-01-19T07:36:06Z     3363 107148 100000 100000 accept4  httpd
+2021-01-19T07:36:06Z     3363 107146 100000 100000 accept4  httpd
+2021-01-19T07:36:06Z     3363 107148 100000 100000 openat   httpd
+2021-01-19T07:36:06Z     3363 107148 100000 100000 close    httpd
+2021-01-19T07:36:06Z     3363 107148 100000 100000 close    httpd
+```
+
+With `-I`, the tool ignores events occured in the current host namespace.
 
 ## Use inside containers
 
