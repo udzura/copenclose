@@ -1,9 +1,10 @@
+use libc::{access,mount,rlimit,setrlimit,perror};
 use core::time::Duration;
 use std::str;
 use std::collections::HashMap;
 
 use chrono::{Local, SecondsFormat};
-use anyhow::Result;
+use anyhow::{Result,bail};
 use libbpf_rs::PerfBufferBuilder;
 use plain::Plain;
 use structopt::StructOpt;
@@ -88,8 +89,47 @@ fn handle_lost_events(cpu: i32, count: u64) {
     eprintln!("[!] Lost {} events on CPU {}", count, cpu);
 }
 
+fn sys_setup() -> Result<()> {
+    let tracefs_root = "/sys/kernel/debug/tracing\0";
+    let debugfs_root = "/sys/kernel/debug\0";
+    let tracefs =      "tracefs\0";
+    let debugfs =      "debugfs\0";
+
+    unsafe {
+        if access(tracefs_root.as_ptr() as *const libc::c_char, libc::F_OK) == -1 {
+            // Ignore error at this time
+            mount(debugfs.as_ptr() as *const libc::c_char,
+                  debugfs_root.as_ptr() as *const libc::c_char,
+                  debugfs.as_ptr() as *const libc::c_char,
+                  0, std::ptr::null());
+            if mount(tracefs.as_ptr() as *const libc::c_char,
+                     tracefs_root.as_ptr() as *const libc::c_char,
+                     tracefs.as_ptr() as *const libc::c_char,
+                     0, std::ptr::null()) == -1 {
+                perror("mount(target: /sys/kernel/debug)\0".as_ptr() as *const libc::c_char);
+                bail!("Mounting kernel tracefs failed.");
+            }
+        }
+    }
+
+    let rlim = rlimit {
+        rlim_cur: 128 << 20,
+        rlim_max: 128 << 20,
+    };
+
+    unsafe {
+        if setrlimit(libc::RLIMIT_MEMLOCK, &rlim) != 0 {
+            perror("setrlimit(RLIMIT_MEMLOCK)\0".as_ptr() as *const libc::c_char);
+            bail!("Failed to increase rlimit");
+        }
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let opts: Command = Command::from_args();
+    sys_setup()?;
 
     let mut skel_builder: CopencloseSkelBuilder = CopencloseSkelBuilder::default();
     let mut open_skel: OpenCopencloseSkel = skel_builder.open()?;
