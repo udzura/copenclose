@@ -75,6 +75,25 @@ TIME                 CGROUPID PID    UID    GID    SYSCALL  COMM
 
 With `-I`, the tool ignores events occured in the current host namespace.
 
-## Use inside containers
+### Use via Docker
 
-// TBD
+* [Dockerhub](https://hub.docker.com/r/udzura/copenclose/tags?page=1&ordering=last_updated)
+
+```console
+$ sudo docker pull udzura/copenclose:latest
+$ sudo docker run -ti --privileged udzura/copenclose:latest
+TIME                 HOSTNAME         PID    UID    GID    SYSCALL  COMM
+2021-01-26T10:06:14Z ubuntu-groovy    829    0      0      connect  snapd
+2021-01-26T10:06:14Z ubuntu-groovy    829    0      0      close    snapd
+2021-01-26T10:06:14Z 5c84c9955c20     31297  0      0      openat   copenclose
+2021-01-26T10:06:14Z ubuntu-groovy    656    0      0      openat   multipathd
+2021-01-26T10:06:14Z ubuntu-groovy    656    0      0      close    multipathd
+2021-01-26T10:06:14Z ubuntu-groovy    656    0      0      openat   multipathd
+2021-01-26T10:06:14Z ubuntu-groovy    656    0      0      close    multipathd
+2021-01-26T10:06:14Z ubuntu-groovy    23132  0      0      openat   systemd-journal
+...
+```
+
+* Host Requirements:
+  * Kernel >= 5.5
+  * Kernel with `CONFIG_DEBUG_INFO_BTF=y`
