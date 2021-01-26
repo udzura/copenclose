@@ -1,10 +1,11 @@
-use libc::{access,mount,rlimit,setrlimit,perror};
 use core::time::Duration;
 use std::str;
 use std::collections::HashMap;
 
+extern crate ctrlc;
+use libc::{access, mount, rlimit, setrlimit, perror};
 use chrono::{Local, SecondsFormat};
-use anyhow::{Result,bail};
+use anyhow::{Result, bail};
 use libbpf_rs::PerfBufferBuilder;
 use plain::Plain;
 use structopt::StructOpt;
@@ -153,6 +154,12 @@ fn main() -> Result<()> {
         .sample_cb(cb)
         .lost_cb(handle_lost_events)
         .build()?;
+
+    ctrlc::set_handler(move || {
+        unsafe {
+            libc::kill(libc::getpid(), libc::SIGTERM);
+        }
+    })?;
 
     loop {
         perf.poll(Duration::from_millis(100))?;

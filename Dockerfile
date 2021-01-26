@@ -17,4 +17,6 @@ RUN . /root/.cargo/env && \
 FROM ubuntu:groovy
 RUN apt -q -y update && apt -q -y install libelf1 libgcc-s1 && apt -q -y clean
 COPY --from=0 /build/target/debug/copenclose /usr/sbin
-CMD ["/usr/sbin/copenclose"]
+
+ENV VERSION 0.2.0
+ENTRYPOINT ["/usr/sbin/copenclose"]
